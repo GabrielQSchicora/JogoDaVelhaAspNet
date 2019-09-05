@@ -27,22 +27,34 @@ namespace JogoDaVelha
         public int JogadorAtual { get; private set; }
         public int NumeroJogadas { get; private set; } = 0;
 
+
+        /// <summary>
+        /// Calcula qual será o próximo jogador. 
+        /// </summary>
         private void MudaJogadorAtual()
         {
             // 1 | 2 = 1 + 1 = 2 -- Era um   Vira Dois
             // 2 | 2 = 0 + 1 = 1 -- Era Dois Vira Um
-            JogadorAtual = (JogadorAtual | NUMERO_JOGADORES) + 1;
+            JogadorAtual = (JogadorAtual % NUMERO_JOGADORES) + 1;
         }
         private static int TAMANHO_TABULEIRO = 3;
 
         private static int NUMERO_JOGADORES = 2;
 
+        /// <summary>
+        /// Construtor com um jogo criado. Útil para execução de testes e simulações.
+        /// </summary>
+        /// <param name="Tabuleiro"></param>
         public TabuleiroJogo(int[][] Tabuleiro)
             : base()
         {
             this._Tabuleiro = Tabuleiro;
         }
 
+
+        /// <summary>
+        /// Construtor. Cria o tabuleiro com todas as posições vazias.
+        /// </summary>
         public TabuleiroJogo()
         {
             //Inicializa o Tabuleiro.
@@ -61,6 +73,13 @@ namespace JogoDaVelha
             this.JogadorAtual = (new Random().Next(1)) + 1;
         }
 
+        /// <summary>
+        /// Verifica qual o turno e a possibilidade da jogada.
+        /// Caso não encontre nenhum óbice executará a jogada.
+        /// </summary>
+        /// <param name="Jogador">O autor da jogada.</param>
+        /// <param name="posX">A coluna da jogada.</param>
+        /// <param name="posY">A linha da jogada.</param>
         public void Jogar(int Jogador, int posX, int posY)
         {
             if (JogadorAtual != Jogador)
@@ -70,6 +89,10 @@ namespace JogoDaVelha
             if (_Tabuleiro[posY][posX] != 0)
             {
                 throw new Exception("Esta posição já está ocupada.");
+            }
+            if(VerificarGanhador()!= 0)
+            {
+                throw new Exception("O Jogo já terminou. Reinicie para jogar.");
             }
             _Tabuleiro[posY][posX] = JogadorAtual;
             this.MudaJogadorAtual();

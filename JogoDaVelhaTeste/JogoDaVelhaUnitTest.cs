@@ -8,6 +8,21 @@ namespace JogoDaVelhaTeste
     public class JogoDaVelhaUnitTest
     {
         [TestMethod]
+        public void TestarMudarJogador()
+        {
+            TabuleiroJogo tabuleiro = new TabuleiroJogo();
+            int jogador = tabuleiro.JogadorAtual;
+            tabuleiro.Jogar(tabuleiro.JogadorAtual, 0, 0);
+            //Verifica se a mudança de turno está ocorrendo normalmente.
+            if (jogador == 1)
+            {
+                Assert.AreEqual(2, tabuleiro.JogadorAtual);
+            }else if(jogador == 2)
+            {
+                Assert.AreEqual(1, tabuleiro.JogadorAtual);
+            }            
+        }
+        [TestMethod]
         public void TesteDeVencedores()
         {
             TabuleiroJogo tabuleiro = new TabuleiroJogo();
