@@ -34,6 +34,7 @@ namespace JogoDaVelhaWebAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

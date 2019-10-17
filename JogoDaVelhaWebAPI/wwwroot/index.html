@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Jogo da velha</title>
+    <style type="text/css">
+        body {
+            text-align: center;
+        }
+
+        div#players{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        div#players div{
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px;
+            margin: 0 20px;
+        }
+
+        div#players div:not(.selected){
+            color: #000;
+            background-color: #FFF;
+        }
+
+        div#players div.selected{
+            color: #FFF;
+            background-color: #000;
+        }
+
+        div#players div.winner{
+            color: red;
+        }
+
+        button {
+            margin: 30px 0 50px 0;
+        }
+
+        div.tabuleiro {
+            margin: 0 auto 30px auto;
+            width: 600px;
+        }
+
+        div.row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        div.square {
+            width: 200px;
+            height: 200px;
+            border: 1px solid #000;
+        }
+
+        div.square:hover {
+            cursor: pointer;
+            background-color: #F9F9F9;
+        }
+
+        div.row:nth-child(1) div.square {
+            border-top: none;
+        }
+
+        div.row:nth-child(1) div.square:nth-child(1) {
+            border-left: none;
+        }
+
+        div.row:nth-child(1) div.square:nth-child(3) {
+            border-right: none;
+        }
+
+        div.row:nth-child(2) div.square:nth-child(1) {
+            border-left: none;
+        }
+
+        div.row:nth-child(2) div.square:nth-child(3) {
+            border-right: none;
+        }
+
+        div.row:nth-child(3) div.square {
+            border-bottom: none;
+        }
+
+        div.row:nth-child(3) div.square:nth-child(1) {
+            border-left: none;
+        }
+
+        div.row:nth-child(3) div.square:nth-child(3) {
+            border-right: none;
+        }
+
+        div.square:before{
+            font-size: 170px;
+            font-weight: bold;
+            font-family: Arial;
+            padding-top: 5px;
+            display: block;
+        }
+
+        div.square.x:before{
+            content: 'X';
+            color: red;
+        }
+
+        div.square.circle:before{
+            content: 'O';
+            color: blue;
+        }
+    </style>
+    <script>
+        var Tabuleiro;
+        var JogoEncerrado = false;
+        Iniciar();
+
+        function Jogar(element, posX, posY) {
+            if (JogoEncerrado) {
+                alert('Jogo encerrado, reinicie para jogar novamente.');
+                return false;
+            }
+
+            if (Tabuleiro.tabuleiro[posY][posX] != 0) {
+                alert('Está posição do tabuleiro já foi usada, escolha outra.');
+                return false;
+            }
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    if (this.response != 0 && !JogoEncerrado) {
+                        JogoEncerrado = true;
+
+                        switch (parseInt(this.response)) {
+                            case -1:
+                                alert("Jogo terminou empatado");
+                            break;
+                            case 1:
+                                alert("Jogador 1 venceu");
+                                document.querySelector('#players').querySelector('#player1').classList.add('winner');
+                            break;
+                            case 2:
+                                alert("Jogador 2 venceu");
+                                document.querySelector('#players').querySelector('#player2').classList.add('winner');
+                            break;
+                        }
+                    }
+
+                    ObterJogo();
+                }
+            };
+            xhttp.open("GET", "/api/JogoDaVelha/" + Tabuleiro.jogadorAtual + "/" + posX + "/" + posY, true);
+            xhttp.send();
+        }
+        
+        function Iniciar() {
+            JogoEncerrado = false;
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var squares = document.getElementsByClassName('square');
+
+                    for(var i = 0; i < squares.length; i++) {
+                        squares[i].classList.remove("x");
+                        squares[i].classList.remove("circle");
+                    };
+
+                    var players = document.querySelector('#players').querySelectorAll('div');
+
+                    for (i = 0; i < players.length; i++) {
+                        players[i].classList.remove('winner');
+                    }
+
+                    JogoEncerrado = false;
+
+                    alert('Jogo Iniciado');
+                    ObterJogo();
+                }
+            };
+            xhttp.open("GET", "/api/JogoDaVelha/reset", true);
+            xhttp.send();
+        }
+
+        function ObterJogo() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    Tabuleiro = JSON.parse(this.response);
+
+                    for (i = 0; i < 3; i++) {
+                        for (j = 0; j < 3; j++) {
+                            if (Tabuleiro.tabuleiro[i][j] == 1) {
+                                document.querySelector("div.row:nth-child("+(i+1)+") div.square:nth-child("+(j+1)+")").classList.add('x');
+                            } else if (Tabuleiro.tabuleiro[i][j] == 2) {
+                                document.querySelector("div.row:nth-child("+(i+1)+") div.square:nth-child("+(j+1)+")").classList.add('circle');
+                            }
+                        }
+                    }
+
+                    var players = document.querySelector('#players').querySelectorAll('div');
+
+                    for (i = 0; i < players.length; i++) {
+                        players[i].classList.remove('selected');
+                    }
+
+                    document.querySelector('#players').querySelector('#player'+Tabuleiro.jogadorAtual).classList.add('selected');
+                }
+            };
+            xhttp.open("GET", "/api/JogoDaVelha/", true);
+            xhttp.send();
+        }
+    </script>
+</head>
+<body>
+    <h1>Jogo da velha</h1>
+
+    <div id="players">
+        <div id="player1">Jogador 1</div>
+        <div id="player2">Jogador 2</div>
+    </div>
+
+    <button onclick="Iniciar()">Iniciar / Reiniciar</button>
+
+    <div class="tabuleiro">
+        <div class="row">
+            <div class="square" onclick="Jogar(this, 0, 0)"></div>
+            <div class="square" onclick="Jogar(this, 1, 0)"></div>
+            <div class="square" onclick="Jogar(this, 2, 0)"></div>
+        </div>
+        <div class="row">
+            <div class="square" onclick="Jogar(this, 0, 1)"></div>
+            <div class="square" onclick="Jogar(this, 1, 1)"></div>
+            <div class="square" onclick="Jogar(this, 2, 1)"></div>
+        </div>
+        <div class="row">
+            <div class="square" onclick="Jogar(this, 0, 2)"></div>
+            <div class="square" onclick="Jogar(this, 1, 2)"></div>
+            <div class="square" onclick="Jogar(this, 2, 2)"></div>
+        </div>
+    </div>
+</body>
+</html>

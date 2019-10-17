@@ -90,7 +90,7 @@ namespace JogoDaVelha
             {
                 throw new Exception("Esta posição já está ocupada.");
             }
-            if(VerificarGanhador()!= 0)
+            if(VerificarGanhador(null)!= 0)
             {
                 throw new Exception("O Jogo já terminou. Reinicie para jogar.");
             }
@@ -105,10 +105,17 @@ namespace JogoDaVelha
         /// </summary>
         /// <returns>Retorna 0 se o jogo não acabou. -1 Se o jogo terminou empatado
         /// ou um número positivo para o jogador vencedor.</returns>
-        public int VerificarGanhador()
+        public int VerificarGanhador(int[][] refTabuleiro)
         {
-            if (NumeroJogadas == Math.Pow(TAMANHO_TABULEIRO, 2)){
-                return -1;
+            int[][] gameTabuleiro;
+
+            if (refTabuleiro == null)
+            {
+                gameTabuleiro = _Tabuleiro;
+            }
+            else
+            {
+                gameTabuleiro = refTabuleiro;
             }
             /// Procurar uma linha igual na horizontal.
             /// 0 0 0
@@ -116,13 +123,13 @@ namespace JogoDaVelha
             /// 0 0 0
             for(int v=0; v<TAMANHO_TABULEIRO; v++)
             {
-                int jogadaAnterior = _Tabuleiro[v][0];
+                int jogadaAnterior = gameTabuleiro[v][0];
                 if (jogadaAnterior == 0)
                     continue;
                 int h = 1;
                 for (; h < TAMANHO_TABULEIRO; h++)
                 {
-                    if (jogadaAnterior != _Tabuleiro[v][h])
+                    if (jogadaAnterior != gameTabuleiro[v][h])
                         break;                    
                 }
                 if (h == TAMANHO_TABULEIRO)
@@ -137,13 +144,13 @@ namespace JogoDaVelha
             /// 0 0 1
             for (int h = 0; h < TAMANHO_TABULEIRO; h++)
             {
-                int jogadaAnterior = _Tabuleiro[0][h];
+                int jogadaAnterior = gameTabuleiro[0][h];
                 if (jogadaAnterior == 0)
                     continue;
                 int v = 1;
                 for (; v < TAMANHO_TABULEIRO; v++)
                 {
-                    if (jogadaAnterior != _Tabuleiro[v][h])
+                    if (jogadaAnterior != gameTabuleiro[v][h])
                         break;
                 }
                 if (v == TAMANHO_TABULEIRO)
@@ -158,22 +165,28 @@ namespace JogoDaVelha
             /// 0 1 0
             /// 0 0 1
 
-            int diagonal1 = _Tabuleiro[0][0];
-            int diagonal2 = _Tabuleiro[0][TAMANHO_TABULEIRO - 1];
+            int diagonal1 = gameTabuleiro[0][0];
+            int diagonal2 = gameTabuleiro[0][TAMANHO_TABULEIRO - 1];
             int hDiagonal = 0;
             for (; hDiagonal < TAMANHO_TABULEIRO; hDiagonal++)
             {
                 if( diagonal1 == 0 || 
-                    diagonal1 != _Tabuleiro[hDiagonal][hDiagonal])
+                    diagonal1 != gameTabuleiro[hDiagonal][hDiagonal])
                 {
                     diagonal1 = 0;
                 }
                 if (diagonal2 == 0 || 
-                    diagonal2 != _Tabuleiro[hDiagonal][TAMANHO_TABULEIRO -1 -hDiagonal])
+                    diagonal2 != gameTabuleiro[hDiagonal][TAMANHO_TABULEIRO -1 -hDiagonal])
                 {
                     diagonal2 = 0;
                 }
             }
+
+            if (NumeroJogadas == Math.Pow(TAMANHO_TABULEIRO, 2))
+            {
+                return -1;
+            }
+
             //h somente será o Tamanho do Tabuleiro se o laço anterior ter executado todos os paços
             //ou seja encontrou uma diagonal que pertence somente a um usuário.
             if (hDiagonal == TAMANHO_TABULEIRO)
@@ -181,7 +194,6 @@ namespace JogoDaVelha
                 //Se diagonal1 for diferente de 0 retornar diagonal1 se não retornar diagonal 2;
                 return diagonal1 != 0 ? diagonal1 : diagonal2;
             }
-
 
             return 0;
         }
